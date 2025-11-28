@@ -144,6 +144,7 @@ const titleKeyMap = {
   'mcp-servers': 'title.mcp-servers',
   memories: 'title.memories',
   notes: 'title.notes',
+  openagents: 'title.openagents',
   paintings: 'title.paintings',
   settings: 'title.settings',
   translate: 'title.translate'

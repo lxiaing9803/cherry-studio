@@ -41,6 +41,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import MinAppIcon from '../Icons/MinAppIcon'
+import OpenAgentsIcon from '../Icons/OpenAgentsIcon'
 import MinAppTabsPool from '../MinApp/MinAppTabsPool'
 import WindowControls from '../WindowControls'
 
@@ -53,7 +54,8 @@ const logger = loggerService.withContext('TabContainer')
 const getTabIcon = (
   tabId: string,
   minapps: MinAppType[],
-  minAppsCache?: LRUCache<string, MinAppType>
+  minAppsCache?: LRUCache<string, MinAppType>,
+  settedTheme?: ThemeMode
 ): React.ReactNode | undefined => {
   // Check if it's a minapp tab (format: apps:appId)
   if (tabId.startsWith('apps:')) {
@@ -107,6 +109,8 @@ const getTabIcon = (
       return <Settings size={14} />
     case 'code':
       return <Terminal size={14} />
+    case 'openagents':
+      return <OpenAgentsIcon size={14} color={settedTheme === ThemeMode.dark ? 'white' : 'black'} />
     default:
       return null
   }
@@ -250,7 +254,7 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
                   }
                 }}>
                 <TabHeader>
-                  {tab.id && <TabIcon>{getTabIcon(tab.id, minapps, minAppsCache)}</TabIcon>}
+                  {tab.id && <TabIcon>{getTabIcon(tab.id, minapps, minAppsCache,settedTheme)}</TabIcon>}
                   <TabTitle>{getTabTitle(tab.id)}</TabTitle>
                 </TabHeader>
                 {tab.id !== 'home' && (
