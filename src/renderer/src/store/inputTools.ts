@@ -18,6 +18,7 @@ export const DEFAULT_TOOL_ORDER: ToolOrder = {
     'url_context',
     'knowledge_base',
     'mcp_tools',
+    'openagents',
     'generate_image',
     'mention_models'
   ],

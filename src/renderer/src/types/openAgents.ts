@@ -3,27 +3,27 @@
  */
 
 export interface NetworkProfile {
-    name: string;
-    description: string;
-    icon: string;
-    website: string;
-    required_openagents_version: string;
-    mods: string[];
-    connection: {
-      type: string;
-      endpoint: string;
-    };
-    discoverable: boolean;
-    tags: string[];
-    categories: string[];
-    country: string;
-    capacity: number;
-    authentication: {
-      type: string;
-      federation: string;
-    };
-    host: string;
-    port: number;
+  name: string
+  description: string
+  icon: string
+  website: string
+  required_openagents_version: string
+  mods: string[]
+  connection: {
+    type: string
+    endpoint: string
+  }
+  discoverable: boolean
+  tags: string[]
+  categories: string[]
+  country: string
+  capacity: number
+  authentication: {
+    type: string
+    federation: string
+  }
+  host: string
+  port: number
 }
 
 export interface NetworkConnection {
@@ -60,7 +60,6 @@ export interface Network {
   org_id: string
   profile: NetworkProfile
   connection: NetworkConnection
-  authentication: NetworkAuthentication
   stats: NetworkStats
   status: NetworkStatus
   createdAt?: string
@@ -87,3 +86,15 @@ export interface NetworksApiResponse {
   data: NetworksResponseData
 }
 
+export interface NetworkQueryParams {
+  tags?: string
+  categories?: string
+  org?: string
+  q?: string
+  sort?: string
+  status?: string
+  page?: number
+  page_size?: number
+  skip_total?: boolean
+  compat_list?: boolean
+}

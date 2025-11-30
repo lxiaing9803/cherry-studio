@@ -11,6 +11,7 @@ export enum QuickPanelReservedSymbol {
   Mcp = 'mcp',
   McpPrompt = 'mcp-prompt',
   McpResource = 'mcp-resource',
+  OpenAgents = 'openagents',
   SlashCommands = 'slash-commands'
 }
 

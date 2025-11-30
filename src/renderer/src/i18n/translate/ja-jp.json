@@ -2260,6 +2260,40 @@
     },
     "title": "Ollama"
   },
+  "openagents": {
+    "detail": {
+      "agents": "[to be translated]:agents",
+      "capacity": "[to be translated]:Capacity",
+      "created": "[to be translated]:Created",
+      "endpoint": "[to be translated]:Endpoint",
+      "join_network": "[to be translated]:Join Network",
+      "join_network_studio": "[to be translated]:Join Network in Studio",
+      "location": "[to be translated]:Location",
+      "network_description": "[to be translated]:Network Description",
+      "network_id": "[to be translated]:Network ID",
+      "network_organization": "[to be translated]:Network Organization",
+      "network_profile": "[to be translated]:Network Profile",
+      "no_description": "[to be translated]:No description",
+      "organization": "[to be translated]:Organization",
+      "required_version": "[to be translated]:Required Version",
+      "tags": "[to be translated]:Tags",
+      "updated": "[to be translated]:Updated",
+      "website": "[to be translated]:Website"
+    },
+    "settings": {
+      "addNetwork": "[to be translated]:Add Network",
+      "builtin": "[to be translated]:Built-in",
+      "disable": {
+        "description": "[to be translated]:Disable OpenAgents network features",
+        "label": "[to be translated]:Do not use OpenAgents network"
+      },
+      "network_list": "[to be translated]:Network List",
+      "no_search_results": "[to be translated]:No matching networks found",
+      "search_placeholder": "[to be translated]:Search network name...",
+      "selected_networks": "[to be translated]:Selected Networks",
+      "title": "[to be translated]:OpenAgents Agent Network"
+    }
+  },
   "ovms": {
     "action": {
       "install": "インストール",
@@ -4798,6 +4832,7 @@
     "mcp-servers": "MCP サーバー",
     "memories": "メモリ",
     "notes": "ノート",
+    "openagents": "[to be translated]:OpenAgents",
     "paintings": "ペインティング",
     "settings": "設定",
     "store": "アシスタントライブラリ",

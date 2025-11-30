@@ -12,6 +12,7 @@ import {
   HardDrive,
   Info,
   MonitorCog,
+  Network,
   NotebookPen,
   Package,
   PictureInPicture2,
@@ -33,6 +34,7 @@ import GeneralSettings from './GeneralSettings'
 import MCPSettings from './MCPSettings'
 import MemorySettings from './MemorySettings'
 import NotesSettings from './NotesSettings'
+import OpenAgentsSettings from './OpenAgentsSettings'
 import { ProviderList } from './ProviderSettings'
 import QuickAssistantSettings from './QuickAssistantSettings'
 import QuickPhraseSettings from './QuickPhraseSettings'
@@ -104,6 +106,12 @@ const SettingsPage: FC = () => {
               {t('settings.tool.websearch.title')}
             </MenuItem>
           </MenuItemLink>
+          <MenuItemLink to="/settings/openagents">
+            <MenuItem className={isRoute('/settings/openagents')}>
+              <Network size={18} />
+              {t('openagents.settings.title')}
+            </MenuItem>
+          </MenuItemLink>
           <MenuItemLink to="/settings/memory">
             <MenuItem className={isRoute('/settings/memory')}>
               <Brain size={18} />
@@ -172,6 +180,7 @@ const SettingsPage: FC = () => {
             <Route path="selectionAssistant" element={<SelectionAssistantSettings />} />
             <Route path="data" element={<DataSettings />} />
             <Route path="notes" element={<NotesSettings />} />
+            <Route path="openagents" element={<OpenAgentsSettings />} />
             <Route path="about" element={<AboutSettings />} />
           </Routes>
         </SettingContent>

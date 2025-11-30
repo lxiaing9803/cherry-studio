@@ -22,6 +22,7 @@ import { setNotesPath } from './note'
 import note from './note'
 import nutstore from './nutstore'
 import ocr from './ocr'
+import openagents from './openagents'
 import paintings from './paintings'
 import preprocess from './preprocess'
 import runtime from './runtime'
@@ -60,6 +61,7 @@ const rootReducer = combineReducers({
   translate,
   ocr,
   note,
+  openagents,
   toolPermissions
 })
 
@@ -67,7 +69,7 @@ const persistedReducer = persistReducer(
   {
     key: 'cherry-studio',
     storage,
-    version: 179,
+    version: 180,
     blacklist: ['runtime', 'messages', 'messageBlocks', 'tabs', 'toolPermissions'],
     migrate
   },

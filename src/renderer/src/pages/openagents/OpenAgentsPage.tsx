@@ -1,10 +1,12 @@
 import { loggerService } from '@logger'
+import NetworkDetailModal from '@renderer/components/OpenAgents/NetworkDetailModal'
+import OpenAgentsCard from '@renderer/components/OpenAgents/OpenAgentsCard'
 import type { Network, NetworksApiResponse } from '@renderer/types'
-import { Tag } from 'antd'
 import axios from 'axios'
-import { Eye, Heart, Plus, Users } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 const logger = loggerService.withContext('OpenAgentsPage')
@@ -12,24 +14,26 @@ const logger = loggerService.withContext('OpenAgentsPage')
 const OpenAgentsPage = () => {
   const [networks, setNetworks] = useState<Network[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   const getData = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await axios.get<NetworksApiResponse>(
-        `https://endpoint.openagents.org/v1/networks`,
-        {
-          params: { page: 1, per_page: 12, sort: 'online_agents' }
-        }
-      )
+      const response = await axios.get<NetworksApiResponse>(`https://endpoint.openagents.org/v1/networks`, {
+        params: { page: 1, page_size: 200, status: 'online' }
+      })
 
       // 安全地获取数据
       const networksData = response.data?.data?.items || []
 
       if (!Array.isArray(networksData)) {
-        logger.warn('Unexpected API response structure', { data: response.data })
+        logger.warn('Unexpected API response structure', {
+          data: response.data
+        })
         setNetworks([])
         return
       }
@@ -54,10 +58,18 @@ const OpenAgentsPage = () => {
     return String(num)
   }
 
-
   const handleAdd = () => {
-    // TODO: 实现添加功能
-    logger.info('Add network clicked')
+    navigate('/settings/openagents')
+  }
+
+  const handleCardClick = (network: Network) => {
+    setSelectedNetwork(network)
+    setModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setModalOpen(false)
+    setSelectedNetwork(null)
   }
 
   return (
@@ -69,59 +81,34 @@ const OpenAgentsPage = () => {
         </AddButton>
       </Sidebar>
       <MainContent>
-        <Title>OpenAgents</Title>
-        {loading ? (
-          <LoadingText>{t('common.loading')}</LoadingText>
-        ) : networks.length === 0 ? (
-          <LoadingText>{t('common.no_results')}</LoadingText>
-        ) : (
-          <Grid>
-            {networks.map((network) => {
-              const name = network.profile?.name || network.connection?.name || network.id
-              const description = network.profile?.description || network.connection?.description || ''
-              const org = network.org || network.org_id || ''
-              const icon = network.connection?.icon
-              const onlineAgents = network.stats?.online_agents || 0
-              const totalAgents = network.profile?.capacity || 0
-              const views = network.stats?.views || 0
-              const likes = network.stats?.likes || 0
-              const status = network.status
-              return (
-                <Card key={network.id}>
-                  <CardHeader>
-                    <CardTitleRow>
-                      {icon && <CardIcon src={icon} alt={name} />}
-                      <CardTitle>{name}</CardTitle>
-                    </CardTitleRow>
-                    <StatusBadge $status={status}>
-                      {status}
-                    </StatusBadge>
-                  </CardHeader>
-                  <Organization>Organization: {org}</Organization>
-                  <Description>{description}</Description>
-
-                  <Metrics>
-                    <MetricItem>
-                      <Users size={14} />
-                      <MetricText>
-                        {onlineAgents} / {totalAgents}
-                      </MetricText>
-                    </MetricItem>
-                    <MetricItem>
-                      <Eye size={14} />
-                      <MetricText>{formatNumber(views)}</MetricText>
-                    </MetricItem>
-                    <MetricItem>
-                      <Heart size={14} />
-                      <MetricText>{formatNumber(likes)}</MetricText>
-                    </MetricItem>
-                  </Metrics>
-                </Card>
-              )
-            })}
-          </Grid>
-        )}
+        <TitleHeader>
+          <Title>OpenAgents</Title>
+        </TitleHeader>
+        <ContentArea>
+          {loading ? (
+            <LoadingText>{t('common.loading')}</LoadingText>
+          ) : networks.length === 0 ? (
+            <LoadingText>{t('common.no_results')}</LoadingText>
+          ) : (
+            <Grid>
+              {networks.map((network) => (
+                <OpenAgentsCard
+                  key={network.id}
+                  network={network}
+                  formatNumber={formatNumber}
+                  onClick={handleCardClick}
+                />
+              ))}
+            </Grid>
+          )}
+        </ContentArea>
       </MainContent>
+      <NetworkDetailModal
+        network={selectedNetwork}
+        open={modalOpen}
+        onClose={handleModalClose}
+        formatNumber={formatNumber}
+      />
     </Container>
   )
 }
@@ -176,8 +163,15 @@ const MainContent = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 20px;
+`
+
+const TitleHeader = styled.div`
+  flex-shrink: 0;
+  padding-bottom: 16px;
+  border-bottom: 0.5px solid var(--color-border);
+  margin-bottom: 20px;
 `
 
 const Title = styled.h1`
@@ -185,7 +179,14 @@ const Title = styled.h1`
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
-  padding: 0 8px 8px;
+  padding: 0 8px;
+`
+
+const ContentArea = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 4px; /* 为第一排卡片的悬浮效果预留空间 */
 `
 
 const LoadingText = styled.div`
@@ -199,131 +200,25 @@ const Grid = styled.div`
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   padding: 0 8px;
-`
+  padding-top: 4px; /* 为第一排卡片的悬浮效果预留额外空间 */
 
-const Card = styled.div`
-  display: flex;
-  flex-direction: column;
-  border: 0.5px solid var(--color-border);
-  border-radius: 12px;
-  padding: 16px;
-  background-color: var(--color-background);
-  transition: all 0.2s ease;
-  cursor: pointer;
-
-  &:hover {
-    border-color: var(--color-primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+  /* 根据屏幕宽度自适应列数 */
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
   }
-`
 
-const CardHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  gap: 8px;
-`
+  @media (min-width: 1600px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 
-const CardTitleRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-`
+  @media (min-width: 2000px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
 
-const CardIcon = styled.img`
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  object-fit: cover;
-  flex-shrink: 0;
-`
-
-const CardTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text);
-  margin: 0;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`
-
-const StatusBadge = styled.span<{ $status: 'online' | 'offline' | 'disabled' }>`
-  display: inline-block;
-  border-radius: 12px;
-  font-size: 11px;
-  padding: 2px 8px;
-  background-color: ${(props) => {
-    switch (props.$status) {
-      case 'online':
-        return '#52c41a'
-      case 'offline':
-        return '#ff4d4f'
-      case 'disabled':
-        return '#8c8c8c'
-      default:
-        return '#8c8c8c'
-    }
-  }};
-  color: white;
-  border: none;
-  flex-shrink: 0;
-`
-
-const Organization = styled.div`
-  font-size: 12px;
-  color: var(--color-text-2);
-  margin-bottom: 8px;
-`
-
-const Description = styled.div`
-  font-size: 13px;
-  color: var(--color-text-2);
-  line-height: 1.5;
-  margin-bottom: 12px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex: 1;
-`
-
-const TagsContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-`
-
-const CategoryTag = styled(Tag)`
-  margin: 0;
-  font-size: 11px;
-  border-radius: 4px;
-`
-
-const Metrics = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding-top: 12px;
-  border-top: 0.5px solid var(--color-border);
-`
-
-const MetricItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-text-2);
-`
-
-const MetricText = styled.span`
-  font-size: 12px;
-  color: var(--color-text-2);
+  /* 最小保持2列 */
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `
 
 export default OpenAgentsPage

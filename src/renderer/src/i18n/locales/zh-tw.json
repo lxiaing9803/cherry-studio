@@ -2260,6 +2260,40 @@
     },
     "title": "Ollama"
   },
+  "openagents": {
+    "detail": {
+      "agents": "agents",
+      "capacity": "Capacity",
+      "created": "Created",
+      "endpoint": "Endpoint",
+      "join_network": "加入網絡",
+      "join_network_studio": "Join Network in Studio",
+      "location": "Location",
+      "network_description": "Network Description",
+      "network_id": "Network ID",
+      "network_organization": "Network Organization",
+      "network_profile": "Network Profile",
+      "no_description": "無描述",
+      "organization": "Organization",
+      "required_version": "Required Version",
+      "tags": "Tags",
+      "updated": "Updated",
+      "website": "Website"
+    },
+    "settings": {
+      "addNetwork": "[to be translated]:Add Network",
+      "builtin": "內置",
+      "disable": {
+        "description": "[to be translated]:Disable OpenAgents network features",
+        "label": "[to be translated]:Do not use OpenAgents network"
+      },
+      "network_list": "網絡列表",
+      "no_search_results": "未找到匹配的網絡",
+      "search_placeholder": "搜索網絡名稱...",
+      "selected_networks": "已選網絡",
+      "title": "OpenAgents智能體網絡"
+    }
+  },
   "ovms": {
     "action": {
       "install": "安裝",

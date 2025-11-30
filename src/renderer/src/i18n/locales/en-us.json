@@ -2260,6 +2260,40 @@
     },
     "title": "Ollama"
   },
+  "openagents": {
+    "detail": {
+      "agents": "agents",
+      "capacity": "Capacity",
+      "created": "Created",
+      "endpoint": "Endpoint",
+      "join_network": "Join Network",
+      "join_network_studio": "Join Network in Studio",
+      "location": "Location",
+      "network_description": "Network Description",
+      "network_id": "Network ID",
+      "network_organization": "Network Organization",
+      "network_profile": "Network Profile",
+      "no_description": "No description",
+      "organization": "Organization",
+      "required_version": "Required Version",
+      "tags": "Tags",
+      "updated": "Updated",
+      "website": "Website"
+    },
+    "settings": {
+      "addNetwork": "Add Network",
+      "builtin": "Built-in",
+      "disable": {
+        "description": "Disable OpenAgents Agent Network features",
+        "label": "Do not use OpenAgents Agent Network"
+      },
+      "network_list": "Network List",
+      "no_search_results": "No matching networks found",
+      "search_placeholder": "Search network name...",
+      "selected_networks": "Selected Networks",
+      "title": "OpenAgents Agent Network"
+    }
+  },
   "ovms": {
     "action": {
       "install": "Install",

@@ -254,7 +254,7 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
                   }
                 }}>
                 <TabHeader>
-                  {tab.id && <TabIcon>{getTabIcon(tab.id, minapps, minAppsCache,settedTheme)}</TabIcon>}
+                  {tab.id && <TabIcon>{getTabIcon(tab.id, minapps, minAppsCache, settedTheme)}</TabIcon>}
                   <TabTitle>{getTabTitle(tab.id)}</TabTitle>
                 </TabHeader>
                 {tab.id !== 'home' && (

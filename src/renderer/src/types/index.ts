@@ -47,6 +47,7 @@ export type Assistant = {
   enableUrlContext?: boolean
   enableGenerateImage?: boolean
   mcpServers?: MCPServer[]
+  openAgentsNetworks?: Network[]
   knowledgeRecognition?: 'off' | 'on'
   regularPhrases?: QuickPhrase[] // Added for regular phrase
   tags?: string[] // 助手标签
