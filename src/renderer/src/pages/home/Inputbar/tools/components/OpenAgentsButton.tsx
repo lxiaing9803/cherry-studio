@@ -7,10 +7,11 @@ import { useAssistant } from '@renderer/hooks/useAssistant'
 import { useOpenAgents } from '@renderer/hooks/useOpenAgents'
 import type { ToolQuickPanelApi } from '@renderer/pages/home/Inputbar/types'
 import { EventEmitter } from '@renderer/services/EventService'
+import { loggerService } from '@renderer/services/LoggerService'
 import openAgentsService from '@renderer/services/OpenAgentsService'
 import type { Network } from '@renderer/types'
 import { ThemeMode } from '@renderer/types'
-import { Tooltip } from 'antd'
+import { message, Tooltip } from 'antd'
 import { CircleX, Globe, Plus } from 'lucide-react'
 import type { FC } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
@@ -21,6 +22,8 @@ interface Props {
   assistantId: string
   quickPanel: ToolQuickPanelApi
 }
+
+const logger = loggerService.withContext('OpenAgentsButton')
 
 const OpenAgentsButton: FC<Props> = ({ quickPanel, assistantId }) => {
   const { t } = useTranslation()
@@ -47,7 +50,7 @@ const OpenAgentsButton: FC<Props> = ({ quickPanel, assistantId }) => {
           setNetworks(fetchedNetworks)
         }
       } catch (error) {
-        console.error('Failed to fetch networks:', error)
+        logger.error('Failed to fetch networks', error instanceof Error ? error : new Error(String(error)))
       }
     }
 
@@ -59,20 +62,74 @@ const OpenAgentsButton: FC<Props> = ({ quickPanel, assistantId }) => {
   // 当前助手激活的网络
   const assistantNetworks = useMemo(() => assistant.openAgentsNetworks || [], [assistant.openAgentsNetworks])
 
+  /**
+   * 调用 localhost:8780 的 create_mcp_client 接口
+   * @param network 选中的网络
+   */
+  const createMcpClient = useCallback(async (network: Network) => {
+    try {
+      // 从 network 中提取 MCP 端点信息
+      // 根据 network.yaml 配置，MCP 端口通常是 HTTP 端口 + 100，端点是 /mcp
+      const httpPort = network.connection?.port || network.profile?.port || 8880
+      const mcpPort = httpPort + 100 // MCP 端口通常是 HTTP 端口 + 100
+      const host = network.connection?.host || network.profile?.host || 'localhost'
+      const mcpUrl = `http://${host}:${mcpPort}/mcp`
+
+      // 构建请求参数（根据 test_mcp_tools.py 中的 create_mcp_client 函数）
+      const requestBody = {
+        url: mcpUrl,
+        auth_token: network.profile?.authentication?.federation || undefined
+      }
+
+      // 调用 localhost:8780 的 create_mcp_client 接口
+      const response = await fetch(`http://localhost:8880/mcp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
+      }
+
+      const result = await response.json()
+      logger.info('MCP client created successfully', { networkId: network.id, result })
+      message.success(`已为网络 ${network.profile?.name || network.id} 创建 MCP 客户端`)
+      return result
+    } catch (error) {
+      logger.error('Failed to create MCP client', error instanceof Error ? error : new Error(String(error)))
+      message.error(`创建 MCP 客户端失败: ${error instanceof Error ? error.message : String(error)}`)
+      throw error
+    }
+  }, [])
+
   // 处理网络选择/取消
   const handleNetworkSelect = useCallback(
-    (network: Network) => {
+    async (network: Network) => {
       const update = { ...assistant }
       if (assistantNetworks.some((n) => n.id === network.id)) {
         // 取消选中
         update.openAgentsNetworks = assistantNetworks.filter((n) => n.id !== network.id)
       } else {
-        // 选中
-        update.openAgentsNetworks = [...assistantNetworks, network]
+        // 选中 - 调用 create_mcp_client 接口
+        try {
+          await createMcpClient(network)
+          update.openAgentsNetworks = [...assistantNetworks, network]
+        } catch (error) {
+          // 如果创建 MCP 客户端失败，仍然允许选择网络，但记录错误
+          logger.warn('Failed to create MCP client, but network selection will continue', {
+            networkId: network.id,
+            error: error instanceof Error ? error : new Error(String(error))
+          })
+          update.openAgentsNetworks = [...assistantNetworks, network]
+        }
       }
       updateAssistant(update)
     },
-    [assistant, assistantNetworks, updateAssistant]
+    [assistant, assistantNetworks, updateAssistant, createMcpClient]
   )
 
   const handleNetworkSelectRef = useRef(handleNetworkSelect)
@@ -115,7 +172,7 @@ const OpenAgentsButton: FC<Props> = ({ quickPanel, assistantId }) => {
     })
 
     return newList
-  }, [availableNetworks, assistantNetworks, t, navigate, assistant, updateAssistant])
+  }, [availableNetworks, assistantNetworks, t, navigate, assistant, updateAssistant, quickPanelHook])
 
   const openQuickPanel = useCallback(() => {
     quickPanelHook.open({
