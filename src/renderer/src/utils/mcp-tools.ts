@@ -127,6 +127,106 @@ export async function callBuiltInTool(toolResponse: MCPToolResponse): Promise<MC
     }
   }
 
+  if (toolResponse.tool.name === 'list_mcp_tools') {
+    try {
+      // 获取当前助手（从 store 中获取第一个助手，或者可以根据需要改进）
+      const assistants = store.getState().assistants.assistants
+      const assistant = assistants.length > 0 ? assistants[0] : null
+      
+      if (!assistant) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: '无法获取助手信息，请确保至少有一个助手'
+            }
+          ]
+        }
+      }
+
+      // 获取所有 MCP tools（包括内置工具、MCP 服务器工具和 OpenAgents 网络工具）
+      const { fetchMcpTools } = await import('@renderer/services/ApiService')
+      const allTools = await fetchMcpTools(assistant)
+
+      // 构建返回结果，按服务器分组
+      const toolsByServer = new Map<string, Array<{ name: string; description: string; serverName: string; serverId: string }>>()
+      
+      allTools.forEach((tool) => {
+        const serverName = tool.serverName || 'Built-in'
+        if (!toolsByServer.has(serverName)) {
+          toolsByServer.set(serverName, [])
+        }
+        toolsByServer.get(serverName)!.push({
+          name: tool.name,
+          description: tool.description || '',
+          serverName,
+          serverId: tool.serverId || 'builtin'
+        })
+      })
+
+      // 构建格式化的结果文本
+      let resultText = `## MCP Tools 列表
+
+共找到 ${allTools.length} 个工具：
+
+`
+
+      // 按服务器分组显示
+      toolsByServer.forEach((tools, serverName) => {
+        resultText += `\n### ${serverName} (${tools.length} 个工具)\n\n`
+        tools.forEach((tool, index) => {
+          resultText += `${index + 1}. **${tool.name}**\n`
+          resultText += `   - 描述: ${tool.description || '无描述'}\n`
+          resultText += `   - 服务器ID: ${tool.serverId}\n\n`
+        })
+      })
+
+      // 如果有 OpenAgents 网络，显示连接信息
+      if (assistant.openAgentsNetworks && assistant.openAgentsNetworks.length > 0) {
+        resultText += `\n### 已连接的 OpenAgents 网络：\n\n`
+        assistant.openAgentsNetworks.forEach((network) => {
+          const host = network.connection?.host || network.profile?.host || 'localhost'
+          const port = network.connection?.port || network.profile?.port
+          let mcpUrl: string
+          if (port) {
+            // 直接使用 HTTP 端口
+            const protocol = host.includes('localhost') || host.includes('127.0.0.1') ? 'http' : 'https'
+            mcpUrl = `${protocol}://${host}:${port}/mcp`
+          } else {
+            if (host.startsWith('http://') || host.startsWith('https://')) {
+              mcpUrl = host.endsWith('/mcp') ? host : `${host}/mcp`
+            } else {
+              mcpUrl = `https://${host}/mcp`
+            }
+          }
+          resultText += `- **${network.profile?.name || network.id}**: ${mcpUrl}\n`
+        })
+      }
+
+      return {
+        isError: false,
+        content: [
+          {
+            type: 'text',
+            text: resultText
+          }
+        ]
+      }
+    } catch (error) {
+      logger.error('Error calling list_mcp_tools', error as Error)
+      return {
+        isError: true,
+        content: [
+          {
+            type: 'text',
+            text: `获取 MCP tools 列表失败: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      }
+    }
+  }
+
   return undefined
 }
 
@@ -319,9 +419,57 @@ export function filterMCPTools(
   return mcpTools
 }
 
-export function getMcpServerByTool(tool: MCPTool) {
+export function getMcpServerByTool(tool: MCPTool): MCPServer | undefined {
   const servers = store.getState().mcp.servers
-  return servers.find((s) => s.id === tool.serverId)
+  const foundServer = servers.find((s) => s.id === tool.serverId)
+  
+  // 如果是 OpenAgents network 的工具（serverId 以 openagents_ 开头）
+  if (!foundServer && tool.serverId.startsWith('openagents_')) {
+    // 从 serverId 中提取 network ID
+    const networkId = tool.serverId.replace('openagents_', '')
+    
+    // 从 store 中查找对应的 network
+    const assistants = store.getState().assistants.assistants
+    for (const assistant of assistants) {
+      if (assistant.openAgentsNetworks) {
+        const network = assistant.openAgentsNetworks.find((n) => n.id === networkId)
+        if (network) {
+          // 动态构建 MCP URL
+          const host = network.connection?.host || network.profile?.host || 'localhost'
+          const port = network.connection?.port || network.profile?.port
+          
+          let mcpUrl: string
+          if (port) {
+            // 直接使用 HTTP 端口
+            const protocol = host.includes('localhost') || host.includes('127.0.0.1') ? 'http' : 'https'
+            mcpUrl = `${protocol}://${host}:${port}/mcp`
+          } else {
+            if (host.startsWith('http://') || host.startsWith('https://')) {
+              mcpUrl = host.endsWith('/mcp') ? host : `${host}/mcp`
+            } else {
+              mcpUrl = `https://${host}/mcp`
+            }
+          }
+          
+          return {
+            id: tool.serverId,
+            name: network.profile?.name || network.id,
+            description: network.profile?.description || '',
+            baseUrl: mcpUrl,
+            type: 'streamableHttp',
+            isActive: true,
+            headers: network.profile?.authentication?.federation
+              ? {
+                  Authorization: `Bearer ${network.profile.authentication.federation}`
+                }
+              : undefined
+          }
+        }
+      }
+    }
+  }
+  
+  return foundServer
 }
 
 export function isToolAutoApproved(tool: MCPTool, server?: MCPServer): boolean {

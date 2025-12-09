@@ -47,7 +47,10 @@ const logger = loggerService.withContext('ApiService')
 
 export async function fetchMcpTools(assistant: Assistant) {
   // Get MCP tools (Fix duplicate declaration)
-  let mcpTools: MCPTool[] = [] // Initialize as empty array
+  // Add built-in tools
+  const { BUILT_IN_TOOLS } = await import('@renderer/tools')
+  const mcpTools: MCPTool[] = [...BUILT_IN_TOOLS]
+  
   const allMcpServers = store.getState().mcp.servers || []
   const activedMcpServers = allMcpServers.filter((s) => s.isActive)
   const assistantMcpServers = assistant.mcpServers || []
@@ -66,14 +69,81 @@ export async function fetchMcpTools(assistant: Assistant) {
         }
       })
       const results = await Promise.allSettled(toolPromises)
-      mcpTools = results
+      const serverTools = results
         .filter((result): result is PromiseFulfilledResult<MCPTool[]> => result.status === 'fulfilled')
         .map((result) => result.value)
         .flat()
+      mcpTools.push(...serverTools)
     } catch (toolError) {
       logger.error('Error fetching MCP tools:', toolError as Error)
     }
   }
+  
+  // Add OpenAgents network tools
+  if (assistant.openAgentsNetworks && assistant.openAgentsNetworks.length > 0) {
+    try {
+      const openAgentsToolPromises = assistant.openAgentsNetworks.map(async (network) => {
+        try {
+          // 动态构建 MCP URL
+          // 优先使用 connection 中的信息，如果没有则使用 profile 中的信息
+          const host = network.connection?.host || network.profile?.host || 'localhost'
+          const port = network.connection?.port || network.profile?.port
+          
+          let mcpUrl: string
+          if (port) {
+            // 如果有端口，使用 http://host:port/mcp 格式
+            // 直接使用 HTTP 端口
+            const protocol = host.includes('localhost') || host.includes('127.0.0.1') ? 'http' : 'https'
+            mcpUrl = `${protocol}://${host}:${port}/mcp`
+          } else {
+            // 如果没有端口，可能是完整的 URL，直接使用
+            // 检查是否已经是完整的 URL
+            if (host.startsWith('http://') || host.startsWith('https://')) {
+              mcpUrl = host.endsWith('/mcp') ? host : `${host}/mcp`
+            } else {
+              // 默认使用 https
+              mcpUrl = `https://${host}/mcp`
+            }
+          }
+          
+          const tempServer: MCPServer = {
+            id: `openagents_${network.id}`,
+            name: network.profile?.name || network.id,
+            description: network.profile?.description || '',
+            baseUrl: mcpUrl,
+            type: 'streamableHttp',
+            isActive: true,
+            headers: network.profile?.authentication?.federation
+              ? {
+                  Authorization: `Bearer ${network.profile.authentication.federation}`
+                }
+              : undefined
+          }
+          
+          const tools = await window.api.mcp.listTools(tempServer)
+          logger.info(`从 OpenAgents network ${network.profile?.name || network.id} 获取到 ${tools.length} 个工具`, {
+            networkId: network.id,
+            mcpUrl,
+            toolCount: tools.length
+          })
+          return tools
+        } catch (error) {
+          logger.error(`Error fetching tools from OpenAgents network ${network.id}:`, error as Error)
+          return []
+        }
+      })
+      
+      const openAgentsResults = await Promise.allSettled(openAgentsToolPromises)
+      const openAgentsTools = openAgentsResults
+        .filter((result): result is PromiseFulfilledResult<MCPTool[]> => result.status === 'fulfilled')
+        .map((result) => result.value)
+        .flat()
+      mcpTools.push(...openAgentsTools)
+    } catch (error) {
+      logger.error('Error fetching OpenAgents network tools:', error as Error)
+    }
+  }
+  
   return mcpTools
 }
 
