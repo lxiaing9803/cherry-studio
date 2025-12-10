@@ -1,5 +1,5 @@
 import { loggerService } from '@logger'
-import type { Network, NetworksApiResponse, NetworkQueryParams } from '@renderer/types'
+import type { Network, NetworkQueryParams,NetworksApiResponse } from '@renderer/types'
 import axios from 'axios'
 
 const logger = loggerService.withContext('OpenAgentsService')

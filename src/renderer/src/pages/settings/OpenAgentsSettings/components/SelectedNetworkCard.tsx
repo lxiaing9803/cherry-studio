@@ -1,27 +1,20 @@
-import { loggerService } from '@logger'
 import type { Network } from '@renderer/types'
-import { Button, Switch, Tag, Typography } from 'antd'
-import { Settings2, Trash2 } from 'lucide-react'
+import { Button, Tag, Typography } from 'antd'
+import { Trash2 } from 'lucide-react'
 import type { FC } from 'react'
 import styled from 'styled-components'
-
-const logger = loggerService.withContext('SelectedNetworkCard')
 
 interface SelectedNetworkCardProps {
   network: Network
   isDragging?: boolean
-  onToggle: (networkId: string, enabled: boolean) => void
   onDelete: (networkId: string) => void
-  onSettings?: (networkId: string) => void
   getNetworkVersion?: (network: Network) => string
 }
 
 const SelectedNetworkCard: FC<SelectedNetworkCardProps> = ({
   network,
   isDragging = false,
-  onToggle,
   onDelete,
-  onSettings,
   getNetworkVersion
 }) => {
   const name = network.profile?.name || network.connection?.name || network.id
@@ -38,27 +31,6 @@ const SelectedNetworkCard: FC<SelectedNetworkCardProps> = ({
           <Name>{name}</Name>
         </NameWrapper>
         <Actions onClick={(e) => e.stopPropagation()}>
-          <Switch
-            value={isEnabled}
-            key={network.id}
-            onChange={(checked) => onToggle(network.id, checked)}
-            size="small"
-            data-no-dnd
-          />
-          <Button
-            type="text"
-            shape="circle"
-            icon={<Settings2 size={14} />}
-            onClick={(e) => {
-              e.stopPropagation()
-              if (onSettings) {
-                onSettings(network.id)
-              } else {
-                logger.info('Settings clicked', { networkId: network.id })
-              }
-            }}
-            data-no-dnd
-          />
           <Button
             type="text"
             shape="circle"

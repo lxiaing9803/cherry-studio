@@ -2287,6 +2287,7 @@
         "description": "[to be translated]:Disable OpenAgents network features",
         "label": "[to be translated]:Do not use OpenAgents network"
       },
+      "go_to_use": "[to be translated]:Go to Use",
       "network_list": "[to be translated]:Network List",
       "no_search_results": "[to be translated]:No matching networks found",
       "search_placeholder": "[to be translated]:Search network name...",

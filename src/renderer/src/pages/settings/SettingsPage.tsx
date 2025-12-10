@@ -12,13 +12,13 @@ import {
   HardDrive,
   Info,
   MonitorCog,
-  Network,
   NotebookPen,
   Package,
   PictureInPicture2,
   Server,
   Settings2,
   TextCursorInput,
+  Volleyball,
   Zap
 } from 'lucide-react'
 import type { FC } from 'react'
@@ -108,7 +108,7 @@ const SettingsPage: FC = () => {
           </MenuItemLink>
           <MenuItemLink to="/settings/openagents">
             <MenuItem className={isRoute('/settings/openagents')}>
-              <Network size={18} />
+              <Volleyball size={18} />
               {t('openagents.settings.title')}
             </MenuItem>
           </MenuItemLink>

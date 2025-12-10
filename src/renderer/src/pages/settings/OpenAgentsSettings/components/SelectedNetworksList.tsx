@@ -9,18 +9,14 @@ import SelectedNetworkCard from './SelectedNetworkCard'
 interface SelectedNetworksListProps {
   networks: Network[]
   onSortEnd: (event: { oldIndex: number; newIndex: number }) => void
-  onToggle: (networkId: string, enabled: boolean) => void
   onDelete: (networkId: string) => void
-  onSettings?: (networkId: string) => void
   getNetworkVersion?: (network: Network) => string
 }
 
 const SelectedNetworksList: FC<SelectedNetworksListProps> = ({
   networks,
   onSortEnd,
-  onToggle,
   onDelete,
-  onSettings,
   getNetworkVersion
 }) => {
   const { t } = useTranslation()
@@ -52,9 +48,7 @@ const SelectedNetworksList: FC<SelectedNetworksListProps> = ({
           <SelectedNetworkCard
             network={network}
             isDragging={dragging}
-            onToggle={onToggle}
             onDelete={onDelete}
-            onSettings={onSettings}
             getNetworkVersion={getNetworkVersion}
           />
         )}

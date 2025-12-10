@@ -33,6 +33,7 @@ import {
   Sparkle,
   Sun,
   Terminal,
+  Volleyball,
   X
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -41,7 +42,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import MinAppIcon from '../Icons/MinAppIcon'
-import OpenAgentsIcon from '../Icons/OpenAgentsIcon'
 import MinAppTabsPool from '../MinApp/MinAppTabsPool'
 import WindowControls from '../WindowControls'
 
@@ -110,7 +110,7 @@ const getTabIcon = (
     case 'code':
       return <Terminal size={14} />
     case 'openagents':
-      return <OpenAgentsIcon size={14} color={settedTheme === ThemeMode.dark ? 'white' : 'black'} />
+      return <Volleyball size={14} />
     default:
       return null
   }

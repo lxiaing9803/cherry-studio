@@ -25,13 +25,13 @@ const OpenAgentsSettings = () => {
   // 只在组件挂载时获取一次数据
   useEffect(() => {
     const getData = async () => {
-      try {
-        setLoading(true)
+    try {
+      setLoading(true)
         const fetchedNetworks = await openAgentsService.getNetworks()
         setNetworks(fetchedNetworks)
-      } catch (error) {
-        logger.error('Failed to fetch networks', error instanceof Error ? error : new Error(String(error)))
-      } finally {
+    } catch (error) {
+      logger.error('Failed to fetch networks', error instanceof Error ? error : new Error(String(error)))
+    } finally {
         setLoading(false)
       }
     }
@@ -73,8 +73,8 @@ const OpenAgentsSettings = () => {
       if (network) {
         const isCurrentlySelected = (availableNetworkIds || []).includes(networkId)
         if (isCurrentlySelected) {
-          setSelectedNetworksOrder((prevOrder) => prevOrder.filter((n) => n.id !== networkId))
-        } else {
+        setSelectedNetworksOrder((prevOrder) => prevOrder.filter((n) => n.id !== networkId))
+      } else {
           setSelectedNetworksOrder((prevOrder) => [...prevOrder, network])
         }
       }
@@ -87,9 +87,9 @@ const OpenAgentsSettings = () => {
   // 删除选中的网络
   const handleDeleteNetwork = useCallback(
     (networkId: string) => {
-      setSelectedNetworksOrder((prevOrder) => prevOrder.filter((n) => n.id !== networkId))
+    setSelectedNetworksOrder((prevOrder) => prevOrder.filter((n) => n.id !== networkId))
       toggleAvailableNetwork(networkId)
-      logger.info('Delete network', { networkId })
+    logger.info('Delete network', { networkId })
     },
     [toggleAvailableNetwork]
   )
@@ -132,7 +132,6 @@ const OpenAgentsSettings = () => {
           <SelectedNetworksList
             networks={orderedAvailableNetworks}
             onSortEnd={handleSortEnd}
-            onToggle={handleToggleNetwork}
             onDelete={handleDeleteNetwork}
             getNetworkVersion={getNetworkVersion}
           />

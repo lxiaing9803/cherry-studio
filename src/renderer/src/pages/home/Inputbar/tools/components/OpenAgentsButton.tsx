@@ -1,5 +1,4 @@
 import { ActionIconButton } from '@renderer/components/Buttons'
-import OpenAgentsIcon from '@renderer/components/Icons/OpenAgentsIcon'
 import type { QuickPanelListItem } from '@renderer/components/QuickPanel'
 import { QuickPanelReservedSymbol, useQuickPanel } from '@renderer/components/QuickPanel'
 import { useTheme } from '@renderer/context/ThemeProvider'
@@ -12,11 +11,12 @@ import openAgentsService from '@renderer/services/OpenAgentsService'
 import type { MCPServer, MCPTool, Network } from '@renderer/types'
 import { ThemeMode } from '@renderer/types'
 import { message, Tooltip } from 'antd'
-import { CircleX, Globe, Plus } from 'lucide-react'
+import { CircleX, Globe, Plus, Volleyball } from 'lucide-react'
 import type { FC } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
+import styled from 'styled-components'
 
 interface Props {
   assistantId: string
@@ -24,6 +24,12 @@ interface Props {
 }
 
 const logger = loggerService.withContext('OpenAgentsButton')
+
+// Styled Volleyball 图标，根据 active 状态改变颜色
+const StyledVolleyball = styled(Volleyball)<{ $active: boolean; $theme: ThemeMode }>`
+  color: ${({ $active, $theme }) => ($active ? '#00B96B' : $theme === ThemeMode.dark ? 'white' : 'black')};
+  transition: color 0.2s ease;
+`
 
 const OpenAgentsButton: FC<Props> = ({ quickPanel, assistantId }) => {
   const { t } = useTranslation()
@@ -284,15 +290,14 @@ const OpenAgentsButton: FC<Props> = ({ quickPanel, assistantId }) => {
     }
   }, [openQuickPanel, quickPanelHook])
 
-  useEffect(() => {
-    const iconColor = theme === ThemeMode.dark ? 'white' : 'black'
-    const isActive = assistantNetworks.length > 0
+  const isActive = assistantNetworks.length > 0
 
+  useEffect(() => {
     const disposeMain = quickPanel.registerRootMenu([
       {
         label: t('openagents.settings.title'),
         description: '',
-        icon: <OpenAgentsIcon size={16} color={iconColor} active={isActive} />,
+        icon: <StyledVolleyball size={16} $active={isActive} $theme={theme} />,
         isMenu: true,
         action: () => openQuickPanel()
       }
@@ -304,15 +309,12 @@ const OpenAgentsButton: FC<Props> = ({ quickPanel, assistantId }) => {
       disposeMain()
       disposeMainTrigger()
     }
-  }, [openQuickPanel, quickPanel, t, theme, assistantNetworks.length])
-
-  const isActive = assistantNetworks.length > 0
-  const iconColor = theme === ThemeMode.dark ? 'white' : 'black'
+  }, [openQuickPanel, quickPanel, t, theme, isActive])
 
   return (
     <Tooltip placement="top" title={t('openagents.settings.title')} mouseLeaveDelay={0} arrow>
       <ActionIconButton onClick={handleOpenQuickPanel} active={isActive}>
-        <OpenAgentsIcon size={18} color={iconColor} active={isActive} />
+        <StyledVolleyball size={18} $active={isActive} $theme={theme} />
       </ActionIconButton>
     </Tooltip>
   )

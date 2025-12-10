@@ -2287,6 +2287,7 @@
         "description": "[to be translated]:Disable OpenAgents network features",
         "label": "[to be translated]:Do not use OpenAgents network"
       },
+      "go_to_use": "去使用",
       "network_list": "網絡列表",
       "no_search_results": "未找到匹配的網絡",
       "search_placeholder": "搜索網絡名稱...",

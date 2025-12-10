@@ -2287,6 +2287,7 @@
         "description": "Disable OpenAgents Agent Network features",
         "label": "Do not use OpenAgents Agent Network"
       },
+      "go_to_use": "Go to Use",
       "network_list": "Network List",
       "no_search_results": "No matching networks found",
       "search_placeholder": "Search network name...",

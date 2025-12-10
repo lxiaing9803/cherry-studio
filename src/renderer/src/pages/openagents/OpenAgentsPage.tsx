@@ -77,7 +77,7 @@ const OpenAgentsPage = () => {
       <Sidebar>
         <AddButton onClick={handleAdd}>
           <Plus size={18} />
-          <AddButtonText>{t('button.add')}</AddButtonText>
+          <AddButtonText>{t('openagents.settings.go_to_use')}</AddButtonText>
         </AddButton>
       </Sidebar>
       <MainContent>
@@ -197,27 +197,27 @@ const LoadingText = styled.div`
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   padding: 0 8px;
   padding-top: 4px; /* 为第一排卡片的悬浮效果预留额外空间 */
 
   /* 根据屏幕宽度自适应列数 */
   @media (min-width: 1200px) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   @media (min-width: 1600px) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   @media (min-width: 2000px) {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   /* 最小保持2列 */
   @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `
 

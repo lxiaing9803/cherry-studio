@@ -2287,6 +2287,7 @@
         "description": "不启用 OpenAgents 智能体网络功能",
         "label": "不使用 OpenAgents 智能体网络"
       },
+      "go_to_use": "去使用",
       "network_list": "网络列表",
       "no_search_results": "未找到匹配的网络",
       "search_placeholder": "搜索网络名称...",

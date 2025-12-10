@@ -93,6 +93,9 @@ const Card = styled.div`
   background-color: var(--color-background);
   transition: all 0.2s ease;
   cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 
   &:hover {
     border-color: var(--color-primary);

@@ -1,8 +1,10 @@
+import { useOpenAgents } from '@renderer/hooks/useOpenAgents'
 import type { Network } from '@renderer/types'
 import { Button, Modal, Tag } from 'antd'
 import { Eye, Heart, MapPin, Users } from 'lucide-react'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 interface NetworkDetailModalProps {
@@ -19,6 +21,8 @@ const NetworkDetailModal: FC<NetworkDetailModalProps> = ({
   formatNumber = (num) => String(num)
 }) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { availableNetworkIds, toggleAvailableNetwork } = useOpenAgents()
 
   if (!network) return null
 
@@ -68,6 +72,22 @@ const NetworkDetailModal: FC<NetworkDetailModalProps> = ({
     }
   }
 
+  const handleJoinNetwork = () => {
+    if (!network) return
+
+    // 检查网络是否已经被选中
+    const isAlreadySelected = (availableNetworkIds || []).includes(network.id)
+
+    // 如果未选中，则添加到已选网络
+    if (!isAlreadySelected) {
+      toggleAvailableNetwork(network.id)
+    }
+
+    // 关闭弹窗并跳转到设置页面
+    onClose()
+    navigate('/settings/openagents')
+  }
+
   return (
     <Modal
       title={
@@ -86,7 +106,7 @@ const NetworkDetailModal: FC<NetworkDetailModalProps> = ({
         <Button key="cancel" onClick={onClose}>
           {t('common.cancel', '取消')}
         </Button>,
-        <Button key="join" type="primary" onClick={onClose}>
+        <Button key="join" type="primary" onClick={handleJoinNetwork}>
           {t('openagents.detail.join_network', '加入网络')}
         </Button>
       ]}
