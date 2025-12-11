@@ -1,4 +1,4 @@
-import OpenAgentsIcon from '@renderer/components/Icons/OpenAgentsIcon'
+// import OpenAgentsIcon from '@renderer/components/Icons/OpenAgentsIcon'
 import App from '@renderer/components/MinApp/MinApp'
 import { useMinapps } from '@renderer/hooks/useMinapps'
 import { useRuntime } from '@renderer/hooks/useRuntime'
@@ -66,12 +66,12 @@ const LaunchpadPage: FC = () => {
       path: '/notes',
       bgColor: 'linear-gradient(135deg, #F97316, #FB923C)' // 笔记：橙色，代表活力和清晰思路
     },
-    {
-      icon: <OpenAgentsIcon size={32} />,
-      text: t('title.openagents'),
-      path: '/openagents',
-      bgColor: 'linear-gradient(135deg, #4b5563, #4338ca)'
-    }
+    // {
+    //   icon: <OpenAgentsIcon size={32} />,
+    //   text: t('title.openagents'),
+    //   path: '/openagents',
+    //   bgColor: 'linear-gradient(135deg, #4b5563, #4338ca)'
+    // }
   ]
 
   // 合并并排序小程序列表
